@@ -12,12 +12,11 @@ export function initSearching(searchField) {
     return (data, state, action) => {
         // @todo: #5.2 — применить компаратор
         if (!action || action.name !== 'search') {
-        return data; // Если нет действия поиска, возвращаем данные без изменений
+        return data; /
         }
 
         const searchValue = action.value;
 
-        // Применяем компаратор для фильтрации данных по поисковому запросу
         return data.filter(item => comparator(item, searchValue));
     }
 }

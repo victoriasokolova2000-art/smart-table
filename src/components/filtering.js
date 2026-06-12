@@ -19,6 +19,7 @@ export function initFiltering(elements, indexes) {
      });
     return (data, state, action) => {
         // @todo: #4.2 — обработать очистку поля
+        
         if (action && action.name === 'clear') {
             const input = document.parentElement.querySelector('input');
             if (input) {
