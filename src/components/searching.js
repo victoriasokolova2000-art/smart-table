@@ -12,7 +12,7 @@ export function initSearching(searchField) {
     return (data, state, action) => {
         // @todo: #5.2 — применить компаратор
         if (!action || action.name !== 'search') {
-        return data; /
+        return data; 
         }
 
         const searchValue = action.value;
