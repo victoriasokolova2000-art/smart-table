@@ -4,19 +4,30 @@ import {createComparison, defaultRules} from "../lib/compare.js";
 const compare = createComparison(defaultRules);
 export function initFiltering(elements, indexes) {
     // @todo: #4.1 — заполнить выпадающие списки опциями
-    Object.keys(indexes)                                    // Получаем ключи из объекта
-      .forEach((elementName) => {                        // Перебираем по именам
-        elements[elementName].append(                    // в каждый элемент добавляем опции
-            ...Object.values(indexes[elementName])        // формируем массив имён, значений опций
-            .map(name => {                        // используйте name как значение и текстовое содержимое
-            // @todo: создать и вернуть тег опции
-            const el = document.createElement('option');
-            el.textContent = name;
-            el.value = name;
-            return el;
-            })
-        )
-     });
+    Object.keys(indexes)
+    .forEach((elementName) => {
+      const selectElement = elements[elementName];
+      if (selectElement) {
+        // Очищаем существующие опции (на случай переинициализации)
+        selectElement.innerHTML = '';
+
+        // Добавляем опцию «Все» для возможности сброса фильтра
+        const allOption = document.createElement('option');
+        allOption.value = '';
+        allOption.textContent = 'Все';
+        selectElement.appendChild(allOption);
+
+        // Добавляем опции из indexes
+        Object.values(indexes[elementName])
+          .map(name => {
+            const elem = document.createElement('option');
+            elem.textContent = name;
+            elem.value = name;
+            return elem;
+          })
+          .forEach(option => selectElement.appendChild(option));
+      }
+    });
     return (data, state, action) => {
         // @todo: #4.2 — обработать очистку поля
         
