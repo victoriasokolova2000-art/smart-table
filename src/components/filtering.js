@@ -10,10 +10,10 @@ export function initFiltering(elements, indexes) {
             ...Object.values(indexes[elementName])        // формируем массив имён, значений опций
             .map(name => {                        // используйте name как значение и текстовое содержимое
             // @todo: создать и вернуть тег опции
-            const elem = document.createElement('option');
-            elem.textContent = name;
-            elem.value = name;
-            return elem;
+            const el = document.createElement('option');
+            el.textContent = name;
+            el.value = name;
+            return el;
             })
         )
      });
