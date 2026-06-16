@@ -6,12 +6,12 @@ import {data as sourceData} from "./data/dataset_1.js";
 import {initData} from "./data.js";
 import {processFormData} from "./lib/utils.js";
 
-import {initTable} from "./components/table.js";
 // @todo: подключение
-import {initPagination} from "./components/pagination.js";
-import {initSorting} from "./components/sorting.js";
-import {initFiltering} from "./components/filtering.js";
 import {initSearching} from "./components/searching.js";
+import {initFiltering} from "./components/filtering.js";
+import {initSorting} from "./components/sorting.js";
+import {initPagination} from "./components/pagination.js";
+import {initTable} from "./components/table.js";
 
 // Исходные данные используемые в render()
 const {data, ...indexes} = initData(sourceData);
@@ -22,14 +22,16 @@ const {data, ...indexes} = initData(sourceData);
  */
 function collectState() {
     const state = processFormData(new FormData(sampleTable.container));
-
-        const rowsPerPage = parseInt(state.rowsPerPage);    // приведём количество страниц к числу
+    const rowsPerPage = parseInt(state.rowsPerPage);    // приведём количество страниц к числу
     const page = parseInt(state.page ?? 1);                // номер страницы по умолчанию 1 и тоже число
-
+    const totalFrom = state.totalFrom ? parseFloat(state.totalFrom) : undefined;
+    const totalTo = state.totalTo ? parseFloat(state.totalTo) : undefined;
+    const total = [totalFrom, totalTo];
     return {                                            // расширьте существующий return вот так
         ...state,
         rowsPerPage,
-        page
+        page,
+        total,
     };
 }
 
@@ -57,6 +59,17 @@ const sampleTable = initTable({
 }, render);
 
 // @todo: инициализация
+const applySearching = initSearching('search');
+
+const applySorting = initSorting([        // Нам нужно передать сюда массив элементов, которые вызывают сортировку, чтобы изменять их визуальное представление
+    sampleTable.header.elements.sortByDate,
+    sampleTable.header.elements.sortByTotal
+]);
+
+const applyFiltering = initFiltering(sampleTable.filter.elements, {    // передаём элементы фильтра
+    searchBySeller: indexes.sellers                                    // для элемента с именем searchBySeller устанавливаем массив продавцов
+});
+
 const applyPagination = initPagination(
     sampleTable.pagination.elements,             // передаём сюда элементы пагинации, найденные в шаблоне
     (el, page, isCurrent) => {                    // и колбэк, чтобы заполнять кнопки страниц данными
@@ -68,17 +81,6 @@ const applyPagination = initPagination(
         return el;
     }
 );
-
-const applySorting = initSorting([        // Нам нужно передать сюда массив элементов, которые вызывают сортировку, чтобы изменять их визуальное представление
-    sampleTable.header.elements.sortByDate,
-    sampleTable.header.elements.sortByTotal
-]);
-
-const applyFiltering = initFiltering(sampleTable.filter.elements, {    // передаём элементы фильтра
-    searchBySeller: indexes.sellers                                    // для элемента с именем searchBySeller устанавливаем массив продавцов
-});
-
-const applySearching = initSearching('search');
 
 const appRoot = document.querySelector('#app');
 appRoot.appendChild(sampleTable.container);

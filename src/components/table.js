@@ -13,26 +13,28 @@ export function initTable(settings, onAction) {
 
     // @todo: #1.2 —  вывести дополнительные шаблоны до и после таблицы
     
-    if (before && before.length > 0) {
-        before.reverse().forEach(subName => {
-            root[subName] = cloneTemplate(subName);
-            root.container.prepend(root[subName].container);
-        });
-    }
+   
+    before.reverse().forEach(subName => {
+        root[subName] = cloneTemplate(subName);
+        root.container.prepend(root[subName].container);
+    });
+    
 
-    if (after && after.length > 0) {
-        after.forEach(subName => {
-             root[subName] = cloneTemplate(subName);
-            root.container.append(root[subName].container);
-        })
-    }
+    after.forEach(subName => {
+            root[subName] = cloneTemplate(subName);
+        root.container.append(root[subName].container);
+    })
+    
     // @todo: #1.3 —  обработать события и вызвать onAction()
     root.container.addEventListener('change', () =>{
         onAction();
+        //console.log("hell0");
     });
 
     root.container.addEventListener('reset', () => {
-        setTimeout(onAction, 100);
+        setTimeout(() => {
+            onAction();
+        }, 0);
     });
 
     root.container.addEventListener('submit', (e) => {
