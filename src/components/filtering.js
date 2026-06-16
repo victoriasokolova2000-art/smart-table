@@ -10,7 +10,7 @@ export function initFiltering(elements, indexes) {
       if (selectElement) {
         // Очищаем существующие опции (на случай переинициализации)
         selectElement.innerHTML = '';
-
+//
         // Добавляем опцию «Все» для возможности сброса фильтра
         const allOption = document.createElement('option');
         allOption.value = '';
