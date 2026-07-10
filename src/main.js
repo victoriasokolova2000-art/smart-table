@@ -14,7 +14,7 @@ import {initPagination} from "./components/pagination.js";
 import {initTable} from "./components/table.js";
 
 // Исходные данные используемые в render()
-const {data, ...indexes} = initData(sourceData);
+const api = initData(sourceData);
 
 /**
  * Сбор и обработка полей из таблицы
@@ -41,7 +41,18 @@ function collectState() {
  */
 function render(action) {
     let state = collectState(); // состояние полей из таблицы
-    let result = [...data]; // копируем для последующего изменения
+     let query = {
+        page: state.page,
+        limit: state.rowsPerPage,
+        search: state.search || '',
+        sellerId: state.seller || undefined,
+        customerId: state.customer || undefined,
+        totalRange: state.total
+    }; // копируем для последующего изменения
+
+    const { total, items } = await api.getRecords(query);
+
+    console.log(`Получено записей: ${items.length} из ${total}`);
     // @todo: использование
     result = applySearching(result, state, action);
     result = applyFiltering(result, state, action);
@@ -51,38 +62,50 @@ function render(action) {
     sampleTable.render(result)
 }
 
-const sampleTable = initTable({
-    tableTemplate: 'table',
-    rowTemplate: 'row',
-    before: ['search', 'header', 'filter'],
-    after: ['pagination']
-}, render);
+async function initApp() {
+    indexes = await api.getIndexes();
 
-// @todo: инициализация
-const applySearching = initSearching('search');
+    const sampleTable = initTable({
+        tableTemplate: 'table',
+        rowTemplate: 'row',
+        before: ['search', 'header', 'filter'],
+        after: ['pagination']
+    }, render);
 
-const applySorting = initSorting([        // Нам нужно передать сюда массив элементов, которые вызывают сортировку, чтобы изменять их визуальное представление
-    sampleTable.header.elements.sortByDate,
-    sampleTable.header.elements.sortByTotal
-]);
-
-const applyFiltering = initFiltering(sampleTable.filter.elements, {    // передаём элементы фильтра
-    searchBySeller: indexes.sellers                                    // для элемента с именем searchBySeller устанавливаем массив продавцов
-});
-
-const applyPagination = initPagination(
-    sampleTable.pagination.elements,             // передаём сюда элементы пагинации, найденные в шаблоне
-    (el, page, isCurrent) => {                    // и колбэк, чтобы заполнять кнопки страниц данными
-        const input = el.querySelector('input');
-        const label = el.querySelector('span');
-        input.value = page;
-        input.checked = isCurrent;
-        label.textContent = page;
-        return el;
+    const appRoot = document.querySelector('#app');
+    if (appRoot) {
+        appRoot.appendChild(sampleTable.container);
+    } else {
+        console.error('#app не найден в DOM');
+        return;
     }
-);
 
-const appRoot = document.querySelector('#app');
-appRoot.appendChild(sampleTable.container);
+    // @todo: инициализация
+    const applySearching = initSearching('search');
 
-render();
+    const applySorting = initSorting([        // Нам нужно передать сюда массив элементов, которые вызывают сортировку, чтобы изменять их визуальное представление
+        sampleTable.header.elements.sortByDate,
+        sampleTable.header.elements.sortByTotal
+    ]);
+
+    const applyFiltering = initFiltering(sampleTable.filter.elements, {    // передаём элементы фильтра
+        searchBySeller: indexes.sellers                                    // для элемента с именем searchBySeller устанавливаем массив продавцов
+    });
+
+    const applyPagination = initPagination(
+        sampleTable.pagination.elements,             // передаём сюда элементы пагинации, найденные в шаблоне
+        (el, page, isCurrent) => {                    // и колбэк, чтобы заполнять кнопки страниц данными
+            const input = el.querySelector('input');
+            const label = el.querySelector('span');
+            input.value = page;
+            input.checked = isCurrent;
+            label.textContent = page;
+            return el;
+        }
+    );
+    await render();
+}
+
+initApp().catch(err => {
+    console.error("Ошибка инициализации приложения:", err);
+});

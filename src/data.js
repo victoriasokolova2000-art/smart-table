@@ -10,5 +10,15 @@ export function initData(sourceData) {
         customer: customers[item.customer_id],
         total: item.total_amount
     }));
-    return {sellers, customers, data};
+    return {
+        getIndexes: async () => {
+            return { sellers, customers };
+        },
+        getRecords: async () => {
+            return {
+                total: data.length,
+                items: data,
+            };
+        },
+    };
 }
