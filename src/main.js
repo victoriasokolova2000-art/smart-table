@@ -14,13 +14,28 @@ import {initPagination} from "./components/pagination.js";
 import {initTable} from "./components/table.js";
 
 // Исходные данные используемые в render()
-const api = initData(sourceData);
+const api = initData();
+
+let sampleTable;
+let applySearching, applyFiltering, applySorting, applyPagination;
+let indexes = null;
 
 /**
  * Сбор и обработка полей из таблицы
  * @returns {Object}
  */
 function collectState() {
+    if (!sampleTable || !sampleTable.container) {
+        console.warn('collectState вызван до инициализации sampleTable. Возвращаем дефолтное состояние.');
+        return {
+        rowsPerPage: 10,
+        page: 1,
+        total: [undefined, undefined],
+        search: '',
+        seller: undefined,
+        customer: undefined,
+        };
+    }
     const state = processFormData(new FormData(sampleTable.container));
     const rowsPerPage = parseInt(state.rowsPerPage);    // приведём количество страниц к числу
     const page = parseInt(state.page ?? 1);                // номер страницы по умолчанию 1 и тоже число
@@ -39,8 +54,12 @@ function collectState() {
  * Перерисовка состояния таблицы при любых изменениях
  * @param {HTMLButtonElement?} action
  */
-function render(action) {
+async function render(action) {
     let state = collectState(); // состояние полей из таблицы
+    if (!sampleTable) {
+        console.warn('render вызван до инициализации таблицы. Пропускаем отрисовку.');
+        return;
+    }
      let query = {
         page: state.page,
         limit: state.rowsPerPage,
@@ -50,14 +69,34 @@ function render(action) {
         totalRange: state.total
     }; // копируем для последующего изменения
 
-    const { total, items } = await api.getRecords(query);
+    let items = [];
+    let total = 0;
+
+    try {
+        const res = await api.getRecords(query);
+        items = res?.items || [];
+        total = res?.total || 0;
+    } catch (err) {
+        console.error("Ошибка получения записей:", err);
+    }
+
 
     console.log(`Получено записей: ${items.length} из ${total}`);
     // @todo: использование
-    result = applySearching(result, state, action);
-    result = applyFiltering(result, state, action);
-    result = applySorting(result, state, action);
-    result = applyPagination(result, state, action);
+     let result = [...items];
+
+    if (typeof applySearching === 'function') {
+        result = applySearching(result, state, action);
+    }
+    if (typeof applyFiltering === 'function') {
+        result = applyFiltering(result, state, action);
+    }
+    if (typeof applySorting === 'function') {
+        result = applySorting(result, state, action);
+    }
+    if (typeof applyPagination === 'function') {
+        result = applyPagination(result, state, action);
+    }
 
     sampleTable.render(result)
 }
