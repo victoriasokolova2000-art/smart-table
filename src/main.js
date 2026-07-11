@@ -95,11 +95,12 @@ if (appRoot) {
 
 
 async function init() {
-    const indexes = await api.getIndexes();
+    indexes = await api.getIndexes();
 
     updateIndexes(sampleTable.filter.elements, {
         searchBySeller: indexes.sellers
     });
 }
 
-init().then(render);
+init()
+    .then(() => render());

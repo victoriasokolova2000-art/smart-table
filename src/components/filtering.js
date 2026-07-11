@@ -10,39 +10,37 @@ export function initFiltering(elements) {
         })
     }
 
-    const applyFiltering = (query, state, action) => {
-        // код с обработкой очистки поля
-        if(action && action.name === 'clear') {
-            const parent = action.target.closest('.filter-group');
-            if(parent) {
-                const input = parent.querySelector('input');
-                if(input) {
-                    input.value = '';
-                }
-                const fieldName = action.dataset.field;
-                if(state.filters && fieldName) {
-                    state.filters[fieldName] = '';
-                }
-            }
-            return data;
+   const applyFiltering = (query, state, action) => {
+    if (action?.name === "clear") {
+      const fieldName = action.dataset?.field;
+      if (fieldName) {
+        const input = Object.values(elements).find(
+          (el) => el?.name === fieldName,
+        );
+        if (input) input.value = "";
+      }
+      return query;
+    }
+
+    const filter = {};
+    Object.keys(elements).forEach((key) => {
+      if (elements[key]) {
+        if (
+          ["INPUT", "SELECT"].includes(elements[key].tagName) &&
+          elements[key].value
+        ) {
+          filter[`filter[${elements[key].name}]`] = elements[key].value;
         }
-         
+      }
+    });
 
-        // @todo: #4.5 — отфильтровать данные
-        const filter = {};
-        Object.keys(elements).forEach(key => {
-            if (elements[key]) {
-                if (['INPUT', 'SELECT'].includes(elements[key].tagName) && elements[key].value) { // ищем поля ввода в фильтре с непустыми данными
-                    filter[`filter[${elements[key].name}]`] = elements[key].value; // чтобы сформировать в query вложенный объект фильтра
-                }
-            }
-        })
+    return Object.keys(filter).length
+      ? Object.assign({}, query, filter)
+      : query;
+  };
 
-        return Object.keys(filter).length ? Object.assign({}, query, filter) : query; // если в фильтре что-то добавилось, применим к запросу
-    }
-
-    return {
-        updateIndexes,
-        applyFiltering
-    }
+  return {
+    updateIndexes,
+    applyFiltering
+    };
 }
