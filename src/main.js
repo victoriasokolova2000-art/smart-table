@@ -144,7 +144,6 @@ async function initApp() {
     );
     await render();
 }
-
 initApp().catch(err => {
     console.error("Ошибка инициализации приложения:", err);
 });

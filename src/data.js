@@ -55,5 +55,5 @@ export function initData() {
     return {
         getIndexes,
         getRecords
-};
+    };
 }
